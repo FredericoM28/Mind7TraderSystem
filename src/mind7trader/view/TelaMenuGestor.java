@@ -30,7 +30,7 @@ public class TelaMenuGestor extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                new TelaCadastro(); // CORRIGIDO: mudado de TelaCadastroCliente para TelaCadastro
+                new TelaCadastro(); // bug fixado, mudado de TelaCadastroCliente para TelaCadastro
             }
         });
 

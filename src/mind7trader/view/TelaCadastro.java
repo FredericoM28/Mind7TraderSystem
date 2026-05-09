@@ -98,7 +98,7 @@ public class TelaCadastro extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                LoginCliente control = new LoginCliente(); // CORRIGIDO: mudado de TelaCadastro para LoginCliente
+                LoginCliente control = new LoginCliente(); // mudado de TelaCadastro para LoginCliente, bug fixado
 
                 if(!control.validarTelefone(txtTelefone.getText())) {
 
@@ -126,7 +126,7 @@ public class TelaCadastro extends JFrame {
                         txtEmail.getText(),
                         txtMorada.getText(),
                         0,
-                        new String(txtSenha.getPassword()), // CORRIGIDO: mudado de getText() para getPassword()
+                        new String(txtSenha.getPassword()), // mudado de getText() para getPassword()
                         true
                 );
 

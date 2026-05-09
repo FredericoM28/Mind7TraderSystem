@@ -4,7 +4,7 @@
  */
 package view;
 
-import control.LoginGestor; // CORRIGIDO: import correto
+import control.LoginGestor; 
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +64,7 @@ public class TelaLogin extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                LoginGestor control = new LoginGestor(); // CORRIGIDO: mudado de TelaLogin para LoginGestor
+                LoginGestor control = new LoginGestor(); // bug fixado, mudado de TelaLogin para LoginGestor
 
                 String user = txtUser.getText();
                 String senha = new String(txtSenha.getPassword());
