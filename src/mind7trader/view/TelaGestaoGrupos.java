@@ -67,7 +67,7 @@ public class TelaGestaoGrupos extends JPanel {
 
         gbc.gridx = 1;
         gbc.gridy = 3;
-        JButton btnCriar = createButton("➕ Criar Grupo", new Color(0, 153, 102));
+        JButton btnCriar = createButton(" Criar Grupo", new Color(0, 153, 102));
         btnCriar.addActionListener(e -> criarGrupo());
         formPanel.add(btnCriar, gbc);
 

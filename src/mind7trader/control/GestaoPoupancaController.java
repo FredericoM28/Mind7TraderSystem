@@ -1,4 +1,3 @@
-
 package control;
 
 import model.Poupanca;
@@ -35,24 +34,30 @@ public class GestaoPoupancaController {
         Ficheiro.salvarListaPoupancas(poupancas);
     }
     
-    // CREATE
+    // CREATE - SEM verificação de saldo!
     public Poupanca criarPoupanca(String numeroContaCliente, String idGrupo, 
                                    double valorInvestido, TipoCiclo ciclo, TipoPeriodo periodo) {
-        // Validar se cliente tem saldo suficiente
+        // Validar se cliente existe
         Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(numeroContaCliente);
-        if (cliente == null || !cliente.removerSaldo(valorInvestido)) {
+        if (cliente == null) {
+            System.out.println("Cliente não encontrado: " + numeroContaCliente);
             return null;
         }
+        
+        // NÃO verificar saldo! A poupança é o investimento inicial
+        // O cliente não precisa ter saldo prévio
         
         String id = UUID.randomUUID().toString();
         Poupanca poupanca = new Poupanca(id, numeroContaCliente, idGrupo, valorInvestido, ciclo, periodo);
         poupancas.add(poupanca);
         salvarPoupancas();
         
-        // Atualizar saldo do grupo
-        if (idGrupo != null) {
+        // Adicionar ao grupo se necessário
+        if (idGrupo != null && !idGrupo.isEmpty()) {
             gestaoGrupo.adicionarMembroAoGrupo(idGrupo, numeroContaCliente);
         }
+        
+        System.out.println("Poupança criada: ID=" + id + ", Cliente=" + numeroContaCliente + ", Valor=" + valorInvestido);
         
         return poupanca;
     }
@@ -98,6 +103,10 @@ public class GestaoPoupancaController {
         return ativas;
     }
     
+    public List<Poupanca> listarTodasPoupancas() {
+        return new ArrayList<>(poupancas);
+    }
+    
     // UPDATE
     public boolean concluirPoupanca(String idPoupanca) {
         Poupanca poupanca = buscarPoupancaPorId(idPoupanca);
@@ -110,6 +119,8 @@ public class GestaoPoupancaController {
             Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(poupanca.getNumeroContaCliente());
             if (cliente != null) {
                 cliente.adicionarSaldo(poupanca.getValorTotalComJuros());
+                System.out.println("Poupança concluída: Cliente " + cliente.getNumeroConta() + 
+                                 " recebeu " + poupanca.getValorTotalComJuros());
             }
             
             salvarPoupancas();

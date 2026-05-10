@@ -18,11 +18,33 @@ public class GestaoGrupoController {
     
     private void carregarGrupos() {
         List<Grupo> carregados = Ficheiro.carregarGrupos();
-        if (carregados == null) {
+        if (carregados == null || carregados.isEmpty()) {
             this.grupos = new ArrayList<>();
+            // Criar grupos de exemplo para teste
+            criarGruposExemplo();
         } else {
             this.grupos = carregados;
         }
+    }
+    
+    // Método para criar grupos de exemplo (apenas para teste)
+    private void criarGruposExemplo() {
+        // Verificar se já existem grupos
+        if (!grupos.isEmpty()) {
+            return;
+        }
+        
+        // Criar alguns grupos de exemplo
+        Grupo grupo1 = new Grupo(UUID.randomUUID().toString(), "Grupo Poupança Rápida", TipoCiclo.SEIS_MESES, TipoPeriodo.SEMANAL);
+        Grupo grupo2 = new Grupo(UUID.randomUUID().toString(), "Grupo Investimento Seguro", TipoCiclo.NOVE_MESES, TipoPeriodo.MENSAL);
+        Grupo grupo3 = new Grupo(UUID.randomUUID().toString(), "Grupo Premium", TipoCiclo.DOZE_MESES, TipoPeriodo.MENSAL);
+        
+        grupos.add(grupo1);
+        grupos.add(grupo2);
+        grupos.add(grupo3);
+        
+        salvarGrupos();
+        System.out.println("Grupos de exemplo criados: " + grupos.size());
     }
     
     private void salvarGrupos() {
@@ -31,10 +53,18 @@ public class GestaoGrupoController {
     
     // CREATE
     public Grupo criarGrupo(String nome, TipoCiclo ciclo, TipoPeriodo periodo) {
+        // Verificar se já existe grupo com mesmo nome
+        for (Grupo g : grupos) {
+            if (g.getNome().equalsIgnoreCase(nome) && g.getStatus() == Grupo.StatusGrupo.ATIVO) {
+                return null; // Grupo já existe
+            }
+        }
+        
         String id = UUID.randomUUID().toString();
         Grupo grupo = new Grupo(id, nome, ciclo, periodo);
         grupos.add(grupo);
         salvarGrupos();
+        System.out.println("Grupo criado: " + nome + " - Total grupos: " + grupos.size());
         return grupo;
     }
     
@@ -75,7 +105,12 @@ public class GestaoGrupoController {
                 ativos.add(grupo);
             }
         }
+        System.out.println("Grupos ativos encontrados: " + ativos.size());
         return ativos;
+    }
+    
+    public List<Grupo> listarTodosGrupos() {
+        return new ArrayList<>(grupos);
     }
     
     // UPDATE
@@ -119,14 +154,4 @@ public class GestaoGrupoController {
         Grupo grupo = buscarGrupoPorId(idGrupo);
         return grupo != null ? grupo.getQuantidadeMembros() : 0;
     }
-
-    public boolean atualizarSaldoTotalGrupo(String idGrupo, double valor) {
-    Grupo grupo = buscarGrupoPorId(idGrupo); // Supondo que exista um método para buscar o grupo
-    if (grupo != null) {
-        grupo.adicionarSaldoTotal(valor); // Supondo que Grupo tenha um método para adicionar ao saldo
-        salvarGrupos(); // Persistir as mudanças, similar ao salvarEmprestimos
-        return true;
-    }
-    return false;
-}
 }

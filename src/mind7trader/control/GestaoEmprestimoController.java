@@ -178,7 +178,7 @@ public class GestaoEmprestimoController {
         double parteMembros = jurosPagos * 0.5;
         
         // 50% para a empresa (simulação: adicionar ao saldo total do grupo)
-        gestaoGrupo.atualizarSaldoTotalGrupo(idGrupo, parteEmpresa);
+        //gestaoGrupo.atualizarSaldoTotalGrupo(idGrupo, parteEmpresa); // verifivcar
         
         // 50% para os membros - quem tem maior saldo na poupança ganha mais
         List<Poupanca> poupancasGrupo = gestaoPoupanca.listarPoupancasPorGrupo(idGrupo);

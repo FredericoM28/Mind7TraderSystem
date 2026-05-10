@@ -110,7 +110,7 @@ public class TelaMenuGestor extends JFrame {
         menuPanel.add(Box.createVerticalGlue());
 
         // Botão Sair
-        JButton btnSair = createMenuButton("🚪 Sair do Sistema");
+        JButton btnSair = createMenuButton(" Sair do Sistema");
         btnSair.setBackground(new Color(200, 60, 60));
         btnSair.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(null, "Deseja sair do sistema?", "Sair", JOptionPane.YES_NO_OPTION);
