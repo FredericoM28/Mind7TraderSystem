@@ -6,6 +6,7 @@
 package model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 public class Cliente implements Serializable {
 
@@ -18,12 +19,13 @@ public class Cliente implements Serializable {
     private double saldo;
     private String senha;
     private boolean ativo;
-    private int idade;
+   // private int idade;
+   private LocalDate dataNascimento;
 
     // construtor vazio 
     public Cliente() {
     }
-    
+
     // cronstrutor da classe cliente
     public Cliente(String numeroConta, String nome, String bi, String telefone,
                    String email, String morada, double saldo, String senha, boolean ativo) {
@@ -84,11 +86,19 @@ public class Cliente implements Serializable {
         return numeroConta + ";" + nome + ";" + bi + ";" + telefone + ";" + email + ";" + saldo;
     }
 
-    public int getIdade() {
-        return idade;
+    public LocalDate getDataNascimento() {
+        return dataNascimento;
     }
 
-    public void setIdade(int idade) {
-        this.idade = idade;
+    public void setDataNascimento(LocalDate dataNascimento) {
+        this.dataNascimento = dataNascimento;
     }
+
+    /* public int getIdade() {
+        return idade;
+    }*/
+
+    /*public void setIdade(int idade) {
+        this.idade = idade;
+    }*/
 }
