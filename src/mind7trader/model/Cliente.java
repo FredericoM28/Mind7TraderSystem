@@ -18,10 +18,13 @@ public class Cliente implements Serializable {
     private double saldo;
     private String senha;
     private boolean ativo;
+    private int idade;
 
+    // construtor vazio 
     public Cliente() {
     }
-
+    
+    // cronstrutor da classe cliente
     public Cliente(String numeroConta, String nome, String bi, String telefone,
                    String email, String morada, double saldo, String senha, boolean ativo) {
         this.numeroConta = numeroConta;
@@ -36,6 +39,7 @@ public class Cliente implements Serializable {
     }
 
     // Getters e Setters
+
     public String getNumeroConta() { return numeroConta; }
     public void setNumeroConta(String numeroConta) { this.numeroConta = numeroConta; }
 
@@ -78,5 +82,13 @@ public class Cliente implements Serializable {
     @Override
     public String toString() {
         return numeroConta + ";" + nome + ";" + bi + ";" + telefone + ";" + email + ";" + saldo;
+    }
+
+    public int getIdade() {
+        return idade;
+    }
+
+    public void setIdade(int idade) {
+        this.idade = idade;
     }
 }
