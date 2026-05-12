@@ -97,8 +97,8 @@ public class TelaGestaoGrupos extends JPanel {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actionPanel.setBackground(new Color(240, 248, 245));
         
-        JButton btnAtualizar = createButton("🔄 Atualizar", new Color(70, 130, 180));
-        JButton btnFinalizar = createButton("🏁 Finalizar Grupo", new Color(200, 100, 50));
+        JButton btnAtualizar = createButton(" Atualizar", new Color(70, 130, 180));
+        JButton btnFinalizar = createButton(" Finalizar Grupo", new Color(200, 100, 50));
         
         btnAtualizar.addActionListener(e -> carregarGrupos());
         btnFinalizar.addActionListener(e -> finalizarGrupo());
@@ -168,7 +168,7 @@ public class TelaGestaoGrupos extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this, "Deseja finalizar este grupo? (Não será possível reverter)", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             // Nota: Precisamos do ID completo. Como está truncado, ideal seria ter o ID na tabela escondido
-            JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento completo.\nSelecione um grupo válido.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            /*  JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento completo.\nSelecione um grupo válido.", "Aviso", JOptionPane.INFORMATION_MESSAGE); */
         }
     }
 }

@@ -232,6 +232,6 @@ public class TelaGestaoEmprestimos extends JPanel {
     private void carregarEmprestimos() {
         tableModel.setRowCount(0);
         // Mostrar todos os empréstimos (simplificado)
-        JOptionPane.showMessageDialog(this, "Funcionalidade de listagem em desenvolvimento.\nUse o menu lateral para outras funções.", "Info", JOptionPane.INFORMATION_MESSAGE);
+       /*  JOptionPane.showMessageDialog(this, "Funcionalidade de listagem em desenvolvimento.\nUse o menu lateral para outras funções.", "Info", JOptionPane.INFORMATION_MESSAGE);*/
     }
 }

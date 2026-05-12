@@ -46,8 +46,8 @@ public class TelaRelatorios extends JPanel {
         statsPanel.add(createStatCard(" Total Clientes", String.valueOf(totalClientes), new Color(0, 153, 102)));
         statsPanel.add(createStatCard(" Total Grupos", String.valueOf(totalGrupos), new Color(70, 130, 180)));
         statsPanel.add(createStatCard(" Poupanças Ativas", String.valueOf(totalPoupancas), new Color(255, 140, 0)));
-        statsPanel.add(createStatCard(" Empréstimos", "Em desenvolvimento", new Color(150, 100, 200)));
-        statsPanel.add(createStatCard(" Saldo Total", "Em desenvolvimento", new Color(200, 100, 50)));
+        statsPanel.add(createStatCard(" Empréstimos", "", new Color(150, 100, 200)));
+        statsPanel.add(createStatCard(" Saldo Total", "", new Color(200, 100, 50)));
         statsPanel.add(createStatCard(" Taxa de Juros", "20% ao mês", new Color(0, 120, 100)));
 
         add(statsPanel, BorderLayout.CENTER);
