@@ -53,7 +53,7 @@ public class GestaoEmprestimoController {
         return soma;
     }
     
-    // CREATE - com validação da regra de negócio
+    // CREATE - solicitar empréstimo
     public Emprestimo solicitarEmprestimo(String numeroContaCliente, String idGrupo, double valorSolicitado) {
         // Regra: valor do empréstimo não pode ser maior que a soma dos últimos 2 meses de poupança
         double somaUltimos2Meses = calcularSomaUltimosDoisMesesPoupanca(numeroContaCliente);
@@ -62,7 +62,7 @@ public class GestaoEmprestimoController {
             return null; // Valor solicitado maior que o permitido
         }
         
-        // Verificar se cliente tem saldo para pagar? (opcional)
+        // Verificar se cliente existe
         Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(numeroContaCliente);
         if (cliente == null) {
             return null;
@@ -75,12 +75,13 @@ public class GestaoEmprestimoController {
         
         // Adicionar valor ao saldo do cliente
         cliente.adicionarSaldo(valorSolicitado);
+        gestaoCliente.atualizarCliente(cliente);
         
         salvarEmprestimos();
         return emprestimo;
     }
     
-    // READ
+    // READ - buscar empréstimo por ID
     public Emprestimo buscarEmprestimoPorId(String id) {
         for (Emprestimo emprestimo : emprestimos) {
             if (emprestimo.getId().equals(id)) {
@@ -91,6 +92,7 @@ public class GestaoEmprestimoController {
         return null;
     }
     
+    // READ - listar empréstimos por cliente
     public List<Emprestimo> listarEmprestimosPorCliente(String numeroContaCliente) {
         List<Emprestimo> resultado = new ArrayList<>();
         for (Emprestimo emprestimo : emprestimos) {
@@ -102,6 +104,7 @@ public class GestaoEmprestimoController {
         return resultado;
     }
     
+    // READ - listar empréstimos por grupo
     public List<Emprestimo> listarEmprestimosPorGrupo(String idGrupo) {
         List<Emprestimo> resultado = new ArrayList<>();
         for (Emprestimo emprestimo : emprestimos) {
@@ -113,6 +116,7 @@ public class GestaoEmprestimoController {
         return resultado;
     }
     
+    // READ - listar empréstimos em atraso
     public List<Emprestimo> listarEmprestimosEmAtraso() {
         List<Emprestimo> atrasados = new ArrayList<>();
         for (Emprestimo emprestimo : emprestimos) {
@@ -124,7 +128,40 @@ public class GestaoEmprestimoController {
         return atrasados;
     }
     
-    // UPDATE - Pagamento
+    // READ - listar TODOS os empréstimos (implementado)
+    public List<Emprestimo> listarTodosEmprestimos() {
+        // Verificar e atualizar o status de cada empréstimo antes de retornar
+        for (Emprestimo emprestimo : emprestimos) {
+            emprestimo.verificarAtraso();
+        }
+        return new ArrayList<>(emprestimos);
+    }
+    
+    // READ - listar empréstimos ativos
+    public List<Emprestimo> listarEmprestimosAtivos() {
+        List<Emprestimo> ativos = new ArrayList<>();
+        for (Emprestimo emprestimo : emprestimos) {
+            emprestimo.verificarAtraso();
+            if (emprestimo.getStatus() == Emprestimo.StatusEmprestimo.ATIVO || 
+                emprestimo.getStatus() == Emprestimo.StatusEmprestimo.PENDENTE) {
+                ativos.add(emprestimo);
+            }
+        }
+        return ativos;
+    }
+    
+    // READ - listar empréstimos pagos
+    public List<Emprestimo> listarEmprestimosPagos() {
+        List<Emprestimo> pagos = new ArrayList<>();
+        for (Emprestimo emprestimo : emprestimos) {
+            if (emprestimo.getStatus() == Emprestimo.StatusEmprestimo.PAGO) {
+                pagos.add(emprestimo);
+            }
+        }
+        return pagos;
+    }
+    
+    // UPDATE - pagar empréstimo
     public boolean pagarEmprestimo(String idEmprestimo, double valor) {
         Emprestimo emprestimo = buscarEmprestimoPorId(idEmprestimo);
         if (emprestimo == null) {
@@ -147,6 +184,7 @@ public class GestaoEmprestimoController {
                 double jurosPagos = calcularJurosPagos(emprestimo, valorPagar);
                 distribuirJuros(emprestimo.getIdGrupo(), jurosPagos);
             }
+            gestaoCliente.atualizarCliente(cliente);
             salvarEmprestimos();
             return pagou;
         }
@@ -178,7 +216,7 @@ public class GestaoEmprestimoController {
         double parteMembros = jurosPagos * 0.5;
         
         // 50% para a empresa (simulação: adicionar ao saldo total do grupo)
-        //gestaoGrupo.atualizarSaldoTotalGrupo(idGrupo, parteEmpresa); // verifivcar
+        gestaoGrupo.atualizarSaldoGrupo(idGrupo, parteEmpresa);
         
         // 50% para os membros - quem tem maior saldo na poupança ganha mais
         List<Poupanca> poupancasGrupo = gestaoPoupanca.listarPoupancasPorGrupo(idGrupo);
@@ -200,6 +238,7 @@ public class GestaoEmprestimoController {
                 Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(p.getNumeroContaCliente());
                 if (cliente != null) {
                     cliente.adicionarSaldo(bonusMembro);
+                    gestaoCliente.atualizarCliente(cliente);
                 }
             }
         }
@@ -217,6 +256,27 @@ public class GestaoEmprestimoController {
     public double getTotalDividaAtivaPorCliente(String numeroContaCliente) {
         double total = 0;
         for (Emprestimo e : listarEmprestimosPorCliente(numeroContaCliente)) {
+            if (e.getStatus() != Emprestimo.StatusEmprestimo.PAGO) {
+                total += e.getValorEmDivida();
+            }
+        }
+        return total;
+    }
+    
+    public double getTotalEmprestado() {
+        double total = 0;
+        for (Emprestimo e : emprestimos) {
+            if (e.getStatus() == Emprestimo.StatusEmprestimo.ATIVO || 
+                e.getStatus() == Emprestimo.StatusEmprestimo.PENDENTE) {
+                total += e.getValorSolicitado();
+            }
+        }
+        return total;
+    }
+    
+    public double getTotalDividaAtiva() {
+        double total = 0;
+        for (Emprestimo e : emprestimos) {
             if (e.getStatus() != Emprestimo.StatusEmprestimo.PAGO) {
                 total += e.getValorEmDivida();
             }
