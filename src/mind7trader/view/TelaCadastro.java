@@ -127,7 +127,7 @@ public class TelaCadastro extends JFrame {
                         txtMorada.getText(),
                         0,
                         new String(txtSenha.getPassword()), // mudado de getText() para getPassword()
-                        true
+                        true, null, conta
                 );
 
                 control.salvar(cliente);

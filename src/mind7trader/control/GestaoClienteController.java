@@ -31,7 +31,7 @@ public class GestaoClienteController {
     public Cliente criarCliente(String nome, String bi, String telefone, 
                                 String email, String morada, String senha) {
         String numeroConta = gerarNumeroConta();
-        Cliente cliente = new Cliente(numeroConta, nome, bi, telefone, email, morada, 0, senha, true);
+        Cliente cliente = new Cliente(numeroConta, nome, bi, telefone, email, morada, 0, senha, true, null, numeroConta);
         clientes.add(cliente);
         salvarClientes();
         return cliente;

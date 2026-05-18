@@ -21,6 +21,9 @@ public class Cliente implements Serializable {
     private boolean ativo;
    // private int idade;
    private LocalDate dataNascimento;
+   private String nomeHerdeiro;
+
+   
 
     // construtor vazio 
     public Cliente() {
@@ -28,7 +31,7 @@ public class Cliente implements Serializable {
 
     // cronstrutor da classe cliente
     public Cliente(String numeroConta, String nome, String bi, String telefone,
-                   String email, String morada, double saldo, String senha, boolean ativo) {
+                   String email, String morada, double saldo, String senha, boolean ativo, LocalDate dataNascimento, String nomeHerdeiro) {
         this.numeroConta = numeroConta;
         this.nome = nome;
         this.bi = bi;
@@ -38,6 +41,8 @@ public class Cliente implements Serializable {
         this.saldo = saldo;
         this.senha = senha;
         this.ativo = ativo;
+        this.dataNascimento = dataNascimento;
+        this.nomeHerdeiro = nomeHerdeiro;
     }
 
     // Getters e Setters
@@ -83,7 +88,7 @@ public class Cliente implements Serializable {
 
     @Override
     public String toString() {
-        return numeroConta + ";" + nome + ";" + bi + ";" + telefone + ";" + email + ";" + saldo;
+        return numeroConta + ";" + nome + ";" + bi + ";" + telefone + ";" + email + ";" + saldo + ";" + dataNascimento + ";" + nomeHerdeiro;
     }
 
     public LocalDate getDataNascimento() {
@@ -93,6 +98,13 @@ public class Cliente implements Serializable {
     public void setDataNascimento(LocalDate dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
+     public String getNomeHerdeiro() {
+    return nomeHerdeiro;
+}
+
+   public void setNomeHerdeiro(String nomeHerdeiro) {
+    this.nomeHerdeiro = nomeHerdeiro;
+   }
 
     /* public int getIdade() {
         return idade;
