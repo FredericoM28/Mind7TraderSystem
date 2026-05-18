@@ -29,12 +29,14 @@ public class TelaGestaoPoupancas extends JPanel {
     private JComboBox<String> cmbCiclo;
     
     private List<Grupo> listaGrupos;
+    private List<String> poupancaIds;
 
     public TelaGestaoPoupancas() {
         controller = new GestaoPoupancaController();
         clienteController = new GestaoClienteController();
         grupoController = new GestaoGrupoController();
         listaGrupos = new ArrayList<>();
+        poupancaIds = new ArrayList<>();
         initComponents();
         carregarGruposReais();
         carregarPoupancas();
@@ -101,25 +103,25 @@ public class TelaGestaoPoupancas extends JPanel {
 
         gbc.gridx = 1;
         gbc.gridy = 5;
-        JButton btnCriar = createButton(" Criar Poupança", new Color(0, 153, 102));
+        JButton btnCriar = createButton("💰 Criar Poupança", new Color(0, 153, 102));
         btnCriar.addActionListener(e -> criarPoupanca());
         formPanel.add(btnCriar, gbc);
 
         // Informação da taxa
-        /* JLabel lblTaxa = new JLabel(" Taxa de poupança: 50% (Ex: investe 500 MT → recebe 750 MT no final)");*/
-        /*lblTaxa.setFont(new Font("Arial", Font.ITALIC, 11));
+        JLabel lblTaxa = new JLabel("ℹ️ Taxa de poupança: 50% (Ex: investe 500 MT → recebe 750 MT no final)");
+        lblTaxa.setFont(new Font("Arial", Font.ITALIC, 11));
         lblTaxa.setForeground(new Color(100, 100, 100));
         gbc.gridx = 1;
         gbc.gridy = 6;
-        formPanel.add(lblTaxa, gbc);*/
+        formPanel.add(lblTaxa, gbc);
         
-        // Informação importante - SEM VERIFICAÇÃO DE SALDO
-        /*JLabel lblInfoSaldo = new JLabel(" Nota: O cliente NÃO precisa ter saldo prévio. A poupança é o investimento inicial.");
+        // Informação importante - NÃO precisa de saldo prévio
+        JLabel lblInfoSaldo = new JLabel("📌 Nota: O cliente NÃO precisa ter saldo prévio para iniciar uma poupança.");
         lblInfoSaldo.setFont(new Font("Arial", Font.PLAIN, 10));
         lblInfoSaldo.setForeground(new Color(0, 100, 150));
         gbc.gridx = 1;
         gbc.gridy = 7;
-        formPanel.add(lblInfoSaldo, gbc);*/
+        formPanel.add(lblInfoSaldo, gbc);
 
         add(formPanel, BorderLayout.NORTH);
 
@@ -142,16 +144,16 @@ public class TelaGestaoPoupancas extends JPanel {
         table.getTableHeader().setPreferredSize(new Dimension(100, 32));
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(0, 153, 102)), "Poupanças Ativas"));
+        scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(0, 153, 102)), "Poupanças"));
         add(scrollPane, BorderLayout.CENTER);
 
         // Botões de ação
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actionPanel.setBackground(new Color(240, 248, 245));
         
-        JButton btnAtualizar = createButton(" Atualizar", new Color(70, 130, 180));
-        JButton btnConcluir = createButton(" Concluir Poupança", new Color(0, 120, 80));
-        JButton btnCancelar = createButton(" Cancelar", new Color(200, 60, 60));
+        JButton btnAtualizar = createButton("🔄 Atualizar", new Color(70, 130, 180));
+        JButton btnConcluir = createButton("✅ Concluir Poupança", new Color(0, 120, 80));
+        JButton btnCancelar = createButton("❌ Cancelar", new Color(200, 60, 60));
         
         btnAtualizar.addActionListener(e -> {
             carregarGruposReais();
@@ -181,14 +183,10 @@ public class TelaGestaoPoupancas extends JPanel {
         cmbGrupo.removeAllItems();
         listaGrupos.clear();
         
-        // Adicionar opção "Sem grupo"
         cmbGrupo.addItem("-- Sem grupo --");
         listaGrupos.add(null);
         
-        // Carregar grupos ativos
         List<Grupo> grupos = grupoController.listarTodosGruposAtivos();
-        
-        System.out.println("Carregando grupos... Total encontrado: " + (grupos != null ? grupos.size() : 0));
         
         if (grupos != null && !grupos.isEmpty()) {
             for (Grupo grupo : grupos) {
@@ -196,12 +194,10 @@ public class TelaGestaoPoupancas extends JPanel {
                                   grupo.getCiclo().toString().replace("_", " ") + ")";
                 cmbGrupo.addItem(nomeGrupo);
                 listaGrupos.add(grupo);
-                System.out.println("Grupo adicionado: " + nomeGrupo);
             }
         } else {
             cmbGrupo.addItem("-- Nenhum grupo disponível --");
             listaGrupos.add(null);
-            System.out.println("Nenhum grupo encontrado!");
         }
     }
     
@@ -232,20 +228,18 @@ public class TelaGestaoPoupancas extends JPanel {
             return;
         }
 
-        // Verificar se cliente existe
         var cliente = clienteController.buscarClientePorNumeroConta(numeroConta);
         if (cliente == null) {
             JOptionPane.showMessageDialog(this, "Cliente não encontrado!\nVerifique o número da conta.", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Verificar se o cliente está ativo
         if (!cliente.isAtivo()) {
             JOptionPane.showMessageDialog(this, "Cliente está desativado!\nNão é possível criar poupança.", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // NÃO VERIFICAR SALDO! O cliente pode investir mesmo sem saldo prévio
+        // NÃO VERIFICAR SALDO! O cliente NÃO precisa ter saldo para investir
 
         TipoPeriodo periodo = cmbPeriodo.getSelectedItem().equals("SEMANAL") ? TipoPeriodo.SEMANAL : TipoPeriodo.MENSAL;
         
@@ -257,7 +251,6 @@ public class TelaGestaoPoupancas extends JPanel {
 
         String idGrupo = getIdGrupoSelecionado();
         
-        // Confirmar criação da poupança
         int confirm = JOptionPane.showConfirmDialog(this,
             "Confirmar criação da poupança?\n\n" +
             "Cliente: " + cliente.getNome() + "\n" +
@@ -281,14 +274,15 @@ public class TelaGestaoPoupancas extends JPanel {
         
         if (poupanca != null) {
             JOptionPane.showMessageDialog(this, 
-                " Poupança criada com sucesso!\n\n" +
-                " Detalhes da Poupança:\n" +
+                "✅ Poupança criada com sucesso!\n\n" +
+                "📊 Detalhes da Poupança:\n" +
                 "─────────────────────\n" +
-                " Valor investido: " + String.format("%,.2f", valor) + " MT\n" +
-                " Valor a receber: " + String.format("%,.2f", poupanca.getValorTotalComJuros()) + " MT\n" +
-                " Lucro: " + String.format("%,.2f", poupanca.calcularLucro()) + " MT\n" +
-                " Data de conclusão: " + poupanca.getDataFim() + "\n" +
-                " Dias restantes: " + poupanca.getDiasRestantes() + " dias", 
+                "💰 Valor investido: " + String.format("%,.2f", valor) + " MT\n" +
+                "📈 Valor a receber: " + String.format("%,.2f", poupanca.getValorTotalComJuros()) + " MT\n" +
+                "💵 Lucro: " + String.format("%,.2f", poupanca.calcularLucro()) + " MT\n" +
+                "📅 Data de conclusão: " + poupanca.getDataFim() + "\n" +
+                "⏰ Dias restantes: " + poupanca.getDiasRestantes() + " dias\n\n" +
+                "O cliente receberá este valor no final do ciclo.", 
                 "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             
             txtNumeroConta.setText("");
@@ -296,22 +290,25 @@ public class TelaGestaoPoupancas extends JPanel {
             carregarPoupancas();
         } else {
             JOptionPane.showMessageDialog(this, 
-                " Erro ao criar poupança!\n\n" +
-                "Verifique se o cliente existe e tente novamente.", 
+                "❌ Erro ao criar poupança!\n\n" +
+                "Verifique se o cliente existe.", 
                 "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void carregarPoupancas() {
         tableModel.setRowCount(0);
-        List<Poupanca> poupancas = controller.listarPoupancasAtivas();
+        poupancaIds.clear();
+        
+        List<Poupanca> poupancas = controller.listarTodasPoupancas();
         
         if (poupancas == null || poupancas.isEmpty()) {
-            tableModel.addRow(new Object[]{"--", "--", "--", "--", "--", "--", "Nenhuma poupança ativa"});
+            tableModel.addRow(new Object[]{"--", "--", "--", "--", "--", "--", "Nenhuma poupança"});
             return;
         }
         
         for (Poupanca p : poupancas) {
+            poupancaIds.add(p.getId());
             tableModel.addRow(new Object[]{
                 p.getId().substring(0, Math.min(8, p.getId().length())) + "...",
                 p.getNumeroContaCliente(),
@@ -337,11 +334,31 @@ public class TelaGestaoPoupancas extends JPanel {
             return;
         }
         
-      /*   JOptionPane.showMessageDialog(this, 
-            "Funcionalidade em desenvolvimento.\n\n" +
-            "Para concluir uma poupança, selecione-a e clique em 'Concluir'.\n" +
-            "O sistema automaticamente adicionará o valor + juros ao saldo do cliente.", 
-            "Informação", JOptionPane.INFORMATION_MESSAGE);*/
+        String status = tableModel.getValueAt(selectedRow, 6).toString();
+        if (!status.equals("ATIVA")) {
+            JOptionPane.showMessageDialog(this, "Esta poupança já foi " + status.toLowerCase() + "!\nNão é possível concluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String idPoupanca = poupancaIds.get(selectedRow);
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Deseja concluir esta poupança?\n\n" +
+            "⚠️ ATENÇÃO: O valor + juros será adicionado ao saldo do cliente.\n" +
+            "Esta ação não pode ser desfeita!",
+            "Confirmar Conclusão",
+            JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean sucesso = controller.concluirPoupanca(idPoupanca);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, "✅ Poupança concluída com sucesso!\nO valor + juros foi adicionado ao saldo do cliente.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                carregarPoupancas();
+            } else {
+                JOptionPane.showMessageDialog(this, "❌ Erro ao concluir poupança!\nVerifique se a data de conclusão já foi atingida.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void cancelarPoupanca() {
@@ -357,20 +374,32 @@ public class TelaGestaoPoupancas extends JPanel {
             return;
         }
         
+        String status = tableModel.getValueAt(selectedRow, 6).toString();
+        if (!status.equals("ATIVA")) {
+            JOptionPane.showMessageDialog(this, "Esta poupança já foi " + status.toLowerCase() + "!\nNão é possível cancelar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String idPoupanca = poupancaIds.get(selectedRow);
+        
         int confirm = JOptionPane.showConfirmDialog(this,
             "Deseja realmente cancelar esta poupança?\n\n" +
-            " ATENÇÃO: O valor investido será DEVOLVIDO ao cliente,\n" +
-            "mas os JUROS serão PERDIDOS.\n\n" +
+            "⚠️ ATENÇÃO: A poupança será removida do sistema.\n" +
+            "O cliente NÃO receberá nenhum valor (já que não pagou nada).\n\n" +
             "Esta ação não pode ser desfeita!",
             "Cancelar Poupança",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.WARNING_MESSAGE);
             
         if (confirm == JOptionPane.YES_OPTION) {
-           /*  JOptionPane.showMessageDialog(this, 
-                "Funcionalidade em desenvolvimento.\n\n" +
-                "Em breve será possível cancelar poupanças.", 
-                "Informação", JOptionPane.INFORMATION_MESSAGE);*/
+            boolean sucesso = controller.cancelarPoupanca(idPoupanca);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, "✅ Poupança cancelada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                carregarPoupancas();
+            } else {
+                JOptionPane.showMessageDialog(this, "❌ Erro ao cancelar poupança!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

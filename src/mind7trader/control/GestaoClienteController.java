@@ -31,7 +31,7 @@ public class GestaoClienteController {
     public Cliente criarCliente(String nome, String bi, String telefone, 
                                 String email, String morada, String senha) {
         String numeroConta = gerarNumeroConta();
-        Cliente cliente = new Cliente(numeroConta, nome, bi, telefone, email, morada, 0, senha, true, null, numeroConta);
+        Cliente cliente = new Cliente(numeroConta, nome, bi, telefone, email, morada, 0, senha, true, null, null);
         clientes.add(cliente);
         salvarClientes();
         return cliente;
@@ -66,7 +66,18 @@ public class GestaoClienteController {
         return ativos;
     }
     
-    // UPDATE
+    // UPDATE (NOVO MÉTODO)
+    public boolean atualizarCliente(Cliente clienteAtualizado) {
+        for (int i = 0; i < clientes.size(); i++) {
+            if (clientes.get(i).getNumeroConta().equals(clienteAtualizado.getNumeroConta())) {
+                clientes.set(i, clienteAtualizado);
+                salvarClientes();
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public boolean atualizarCliente(String numeroConta, String nome, String telefone, 
                                     String email, String morada) {
         Cliente cliente = buscarClientePorNumeroConta(numeroConta);

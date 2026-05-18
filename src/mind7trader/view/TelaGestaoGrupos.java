@@ -18,9 +18,13 @@ public class TelaGestaoGrupos extends JPanel {
     private JComboBox<String> cmbPeriodo;
     private JComboBox<String> cmbCiclo;
     private JTextField txtNomeGrupo;
+    
+    // Mapa para armazenar IDs dos grupos
+    private List<String> grupoIds;
 
     public TelaGestaoGrupos() {
         controller = new GestaoGrupoController();
+        grupoIds = new java.util.ArrayList<>();
         initComponents();
         carregarGrupos();
     }
@@ -136,18 +140,27 @@ public class TelaGestaoGrupos extends JPanel {
 
         Grupo grupo = controller.criarGrupo(nome, ciclo, periodo);
         if (grupo != null) {
-            JOptionPane.showMessageDialog(this, "Grupo criado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, " Grupo criado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             txtNomeGrupo.setText("");
             carregarGrupos();
+        } else {
+            JOptionPane.showMessageDialog(this, " Já existe um grupo com este nome!", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void carregarGrupos() {
         tableModel.setRowCount(0);
+        grupoIds.clear();
+        
         List<Grupo> grupos = controller.listarTodosGruposAtivos();
-        for (Grupo g : grupos) {
+        
+        // Também mostrar grupos finalizados?
+        List<Grupo> todosGrupos = controller.listarTodosGrupos();
+        
+        for (Grupo g : todosGrupos) {
+            grupoIds.add(g.getId());
             tableModel.addRow(new Object[]{
-                g.getId().substring(0, 8) + "...",
+                g.getId().substring(0, Math.min(8, g.getId().length())) + "...",
                 g.getNome(),
                 g.getPeriodo(),
                 g.getCiclo().toString().replace("_", " "),
@@ -164,11 +177,31 @@ public class TelaGestaoGrupos extends JPanel {
             JOptionPane.showMessageDialog(this, "Selecione um grupo para finalizar!", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        // Verificar se o grupo já está finalizado
+        String statusAtual = tableModel.getValueAt(selectedRow, 6).toString();
+        if (statusAtual.equals("FINALIZADO")) {
+            JOptionPane.showMessageDialog(this, "Este grupo já está finalizado!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Deseja finalizar este grupo? (Não será possível reverter)", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Deseja finalizar o grupo \"" + tableModel.getValueAt(selectedRow, 1) + "\"?\n\n" +
+            " ATENÇÃO: Esta ação não pode ser desfeita!\n" +
+            "O grupo será marcado como FINALIZADO.", 
+            "Confirmar Finalização", 
+            JOptionPane.YES_NO_OPTION);
+            
         if (confirm == JOptionPane.YES_OPTION) {
-            // Nota: Precisamos do ID completo. Como está truncado, ideal seria ter o ID na tabela escondido
-            /*  JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento completo.\nSelecione um grupo válido.", "Aviso", JOptionPane.INFORMATION_MESSAGE); */
+            String idGrupo = grupoIds.get(selectedRow);
+            boolean sucesso = controller.finalizarGrupo(idGrupo);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, " Grupo finalizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                carregarGrupos();
+            } else {
+                JOptionPane.showMessageDialog(this, " Erro ao finalizar o grupo!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

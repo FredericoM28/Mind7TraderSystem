@@ -34,7 +34,7 @@ public class GestaoPoupancaController {
         Ficheiro.salvarListaPoupancas(poupancas);
     }
     
-    // CREATE - SEM verificação de saldo!
+    // CREATE - SEM verificação de saldo! (O cliente NÃO precisa ter saldo prévio)
     public Poupanca criarPoupanca(String numeroContaCliente, String idGrupo, 
                                    double valorInvestido, TipoCiclo ciclo, TipoPeriodo periodo) {
         // Validar se cliente existe
@@ -44,17 +44,18 @@ public class GestaoPoupancaController {
             return null;
         }
         
-        // NÃO verificar saldo! A poupança é o investimento inicial
-        // O cliente não precisa ter saldo prévio
+        // NÃO verificar saldo! O cliente NÃO precisa ter dinheiro para começar uma poupança
+        // A poupança é um compromisso de investimento futuro
         
         String id = UUID.randomUUID().toString();
         Poupanca poupanca = new Poupanca(id, numeroContaCliente, idGrupo, valorInvestido, ciclo, periodo);
         poupancas.add(poupanca);
         salvarPoupancas();
         
-        // Adicionar ao grupo se necessário
+        // Adicionar ao grupo
         if (idGrupo != null && !idGrupo.isEmpty()) {
             gestaoGrupo.adicionarMembroAoGrupo(idGrupo, numeroContaCliente);
+            gestaoGrupo.atualizarSaldoGrupo(idGrupo, valorInvestido);
         }
         
         System.out.println("Poupança criada: ID=" + id + ", Cliente=" + numeroContaCliente + ", Valor=" + valorInvestido);
@@ -75,8 +76,7 @@ public class GestaoPoupancaController {
     public List<Poupanca> listarPoupancasPorCliente(String numeroContaCliente) {
         List<Poupanca> resultado = new ArrayList<>();
         for (Poupanca poupanca : poupancas) {
-            if (poupanca.getNumeroContaCliente().equals(numeroContaCliente) && 
-                poupanca.getStatus() != Poupanca.StatusPoupanca.CANCELADA) {
+            if (poupanca.getNumeroContaCliente().equals(numeroContaCliente)) {
                 resultado.add(poupanca);
             }
         }
@@ -107,43 +107,69 @@ public class GestaoPoupancaController {
         return new ArrayList<>(poupancas);
     }
     
-    // UPDATE
+    // UPDATE - CONCLUIR poupança
     public boolean concluirPoupanca(String idPoupanca) {
         Poupanca poupanca = buscarPoupancaPorId(idPoupanca);
-        if (poupanca != null && poupanca.isConcluida() && 
-            poupanca.getStatus() == Poupanca.StatusPoupanca.ATIVA) {
-            
-            poupanca.setStatus(Poupanca.StatusPoupanca.CONCLUIDA);
-            
-            // Adicionar valor total + juros ao saldo do cliente
-            Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(poupanca.getNumeroContaCliente());
-            if (cliente != null) {
-                cliente.adicionarSaldo(poupanca.getValorTotalComJuros());
-                System.out.println("Poupança concluída: Cliente " + cliente.getNumeroConta() + 
-                                 " recebeu " + poupanca.getValorTotalComJuros());
-            }
-            
-            salvarPoupancas();
-            return true;
+        if (poupanca == null) {
+            System.out.println("Poupança não encontrada: " + idPoupanca);
+            return false;
         }
-        return false;
+        
+        if (poupanca.getStatus() != Poupanca.StatusPoupanca.ATIVA) {
+            System.out.println("Poupança não está ativa: " + poupanca.getStatus());
+            return false;
+        }
+        
+        // Verificar se já atingiu a data de conclusão
+        if (!poupanca.isConcluida()) {
+            System.out.println("Poupança ainda não atingiu a data de conclusão");
+            return false;
+        }
+        
+        // Mudar status para CONCLUIDA
+        poupanca.setStatus(Poupanca.StatusPoupanca.CONCLUIDA);
+        
+        // Adicionar valor total + juros ao saldo do cliente
+        Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(poupanca.getNumeroContaCliente());
+        if (cliente != null) {
+            double valorReceber = poupanca.getValorTotalComJuros();
+            cliente.adicionarSaldo(valorReceber);
+            gestaoCliente.atualizarCliente(cliente);
+            System.out.println("Poupança concluída: Cliente " + cliente.getNumeroConta() + 
+                             " recebeu " + valorReceber);
+        }
+        
+        salvarPoupancas();
+        return true;
     }
     
+    // UPDATE - CANCELAR poupança
     public boolean cancelarPoupanca(String idPoupanca) {
         Poupanca poupanca = buscarPoupancaPorId(idPoupanca);
-        if (poupanca != null && poupanca.getStatus() == Poupanca.StatusPoupanca.ATIVA) {
-            poupanca.setStatus(Poupanca.StatusPoupanca.CANCELADA);
-            
-            // Devolver apenas o valor investido (sem juros)
-            Cliente cliente = gestaoCliente.buscarClientePorNumeroConta(poupanca.getNumeroContaCliente());
-            if (cliente != null) {
-                cliente.adicionarSaldo(poupanca.getValorInvestido());
-            }
-            
-            salvarPoupancas();
-            return true;
+        if (poupanca == null) {
+            System.out.println("Poupança não encontrada: " + idPoupanca);
+            return false;
         }
-        return false;
+        
+        if (poupanca.getStatus() != Poupanca.StatusPoupanca.ATIVA) {
+            System.out.println("Poupança não está ativa: " + poupanca.getStatus());
+            return false;
+        }
+        
+        // Mudar status para CANCELADA
+        poupanca.setStatus(Poupanca.StatusPoupanca.CANCELADA);
+        
+        // NÃO devolve nada ao cliente porque ele nunca pagou nada
+        // O cancelamento apenas remove a poupança do sistema
+        
+        // Remover do saldo do grupo
+        if (poupanca.getIdGrupo() != null && !poupanca.getIdGrupo().isEmpty()) {
+            gestaoGrupo.atualizarSaldoGrupo(poupanca.getIdGrupo(), -poupanca.getValorInvestido());
+        }
+        
+        salvarPoupancas();
+        System.out.println("Poupança cancelada: " + idPoupanca);
+        return true;
     }
     
     // RELATÓRIOS
